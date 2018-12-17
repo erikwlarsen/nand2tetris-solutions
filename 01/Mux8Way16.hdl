@@ -1,0 +1,28 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/01/Mux8Way16.hdl
+
+/**
+ * 8-way 16-bit multiplexor:
+ * out = a if sel == 000
+ *       b if sel == 001
+ *       etc.
+ *       h if sel == 111
+ */
+
+CHIP Mux8Way16 {
+    IN a[16], b[16], c[16], d[16],
+       e[16], f[16], g[16], h[16],
+       sel[3];
+    OUT out[16];
+
+    PARTS:
+    Mux4Way16(a[0..15]=a[0..15], b[0..15]=b[0..15], c[0..15]=c[0..15], d[0..15]=d[0..15], sel[0]=sel[0], sel[1]=sel[1], out[0..15]=mux1);
+    Mux4Way16(a[0..15]=e[0..15], b[0..15]=f[0..15], c[0..15]=g[0..15], d[0..15]=h[0..15], sel[0]=sel[0], sel[1]=sel[1], out[0..15]=mux2);
+    And16(a[0..15]=true, b[0]=sel[2], b[1]=sel[2], b[2]=sel[2], b[3]=sel[2], b[4]=sel[2], b[5]=sel[2], b[6]=sel[2], b[7]=sel[2], b[8]=sel[2], b[9]=sel[2], b[10]=sel[2], b[11]=sel[2], b[12]=sel[2], b[13]=sel[2], b[14]=sel[2], b[15]=sel[2], out[0..15]=sel216);        
+    Not16(in[0..15]=sel216, out[0..15]=notsel216);
+    And16(a[0..15]=mux1, b[0..15]=notsel216, out[0..15]=almost1);
+    And16(a[0..15]=mux2, b[0..15]=sel216, out[0..15]=almost2);
+    Or16(a[0..15]=almost1, b[0..15]=almost2, out[0..15]=out[0..15]);
+}

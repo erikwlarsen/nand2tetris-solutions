@@ -1,0 +1,35 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/01/Mux4Way16.hdl
+
+/**
+ * 4-way 16-bit multiplexor:
+ * out = a if sel == 00
+ *       b if sel == 01
+ *       c if sel == 10
+ *       d if sel == 11
+ */
+
+CHIP Mux4Way16 {
+    IN a[16], b[16], c[16], d[16], sel[2];
+    OUT out[16];
+
+    PARTS:
+    And16(a[0..15]=true, b[0]=sel[0], b[1]=sel[0], b[2]=sel[0], b[3]=sel[0], b[4]=sel[0], b[5]=sel[0], b[6]=sel[0], b[7]=sel[0], b[8]=sel[0], b[9]=sel[0], b[10]=sel[0], b[11]=sel[0], b[12]=sel[0], b[13]=sel[0], b[14]=sel[0], b[15]=sel[0], out[0..15]=sel016);
+    And16(a[0..15]=true, b[0]=sel[1], b[1]=sel[1], b[2]=sel[1], b[3]=sel[1], b[4]=sel[1], b[5]=sel[1], b[6]=sel[1], b[7]=sel[1], b[8]=sel[1], b[9]=sel[1], b[10]=sel[1], b[11]=sel[1], b[12]=sel[1], b[13]=sel[1], b[14]=sel[1], b[15]=sel[1], out[0..15]=sel116);
+    Or16(a[0..15]=sel016, b[0..15]=sel116, out[0..15]=or2);
+    Not16(in[0..15]=or2, out[0..15]=not2);
+    And16(a[0..15]=not2, b[0..15]=a[0..15], out[0..15]=and1);
+    And16(a[0..15]=sel016, b[0..15]=sel116, out[0..15]=and0);
+    And16(a[0..15]=and0, b[0..15]=d[0..15], out[0..15]=and2);
+    Not16(in[0..15]=sel116, out[0..15]=not0);
+    And16(a[0..15]=sel016, b[0..15]=not0, out[0..15]=and3);
+    And16(a[0..15]=and3, b[0..15]=b[0..15], out[0..15]=and4);
+    Not16(in[0..15]=sel016, out[0..15]=not1);
+    And16(a[0..15]=sel116, b[0..15]=not1, out[0..15]=and5);
+    And16(a[0..15]=and5, b[0..15]=c[0..15], out[0..15]=and6);
+    Or16(a[0..15]=and1, b[0..15]=and2, out[0..15]=or0);
+    Or16(a[0..15]=and4, b[0..15]=and6, out[0..15]=or1);
+    Or16(a[0..15]=or0, b[0..15]=or1, out[0..15]=out[0..15]);
+}
