@@ -1,0 +1,11 @@
+*.out
+*.cmp
+*.tst
+*.txt
+*.pdf
+*.gif
+.DS_Store
+*.html
+*.vm
+*.iml
+*.xml
