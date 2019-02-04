@@ -27,17 +27,77 @@
 
 CHIP CPU {
 
-    IN  inM[16],         // M value input  (M = contents of RAM[A])
-        instruction[16], // Instruction for execution
-        reset;           // Signals whether to re-start the current
+    IN  inM[16],         // M value input  (M = contents of RAM[A]) - x
+        instruction[16], // Instruction for execution - x
+        reset;           // Signals whether to re-start the current - x
                          // program (reset==1) or continue executing
                          // the current program (reset==0).
 
-    OUT outM[16],        // M value output
-        writeM,          // Write to M? 
-        addressM[15],    // Address in data memory (of M)
-        pc[15];          // address of next instruction
+    OUT outM[16],        // M value output - x
+        writeM,          // Write to M?  - x
+        addressM[15],    // Address in data memory (of M) - x
+        pc[15];          // address of next instruction - x
 
     PARTS:
+    // a-instruction: 0xxxxxxxxxxxxxxx
+    // c-instruction: 1xxaccccccdddjjj
+    // x not used
+    // a (instruction[12]): if 0, use A; if 1, use M[A]
+    // cccccc (instruction[11-6]): calculation on D and M/A
+    // for each of ddd (instruction[5-3]), if 1, store value in each register (ADM)
+    // for jjj (instruction[2-0]), in order, jump if value <0, ==0, >0
     // Put your code here:
+
+    // Use instruction[15] to determine which should be used as A register input:
+    // instruction (if a-type instruction) or ALU output from last clock cycle (if c-type)
+    Mux16(a=instruction, b=aluOutput, sel=instruction[15], out=muxOut1);
+    // Reverse first instruction bit to make a-instruction indicator positive
+    Not(in=instruction[15], out=notInst15);
+    // Load the A register if a-instruction, or if c-instruction indicates saving
+    Or(a=notInst15, b=instruction[5], out=aRegisterLoad);
+    // A register
+    ARegister(in=muxOut1, load=aRegisterLoad, out=aRegisterOut);
+    // And16 to make aRegisterOut external as addressM
+    And16(a=aRegisterOut, b[0..15]=true, out[0..14]=addressM);
+    // Decide if A or M[A] should be used
+    Mux16(a=aRegisterOut, b=inM, sel=instruction[12], out=muxOut2);
+    // Load the D register if c-instruction and if saving is indicated
+    And(a=instruction[15], b=instruction[4], out=dRegisterLoad);
+    // D register
+    DRegister(in=aluOutput, load=dRegisterLoad, out=dRegisterOut);
+    // ALU
+    ALU(
+        x=dRegisterOut,
+        y=muxOut2,
+        zx=instruction[11],
+        nx=instruction[10],
+        zy=instruction[9],
+        ny=instruction[8],
+        f=instruction[7],
+        no=instruction[6],
+        out=aluOutput,
+        zr=zr,
+        ng=ng
+    );
+    // And16 to make aluOutput external as outM
+    And16(a=aluOutput, b[0..15]=true, out=outM);
+    // Write to M if c-instruction and if saving is indicated
+    And(a=instruction[15], b=instruction[3], out=writeM);
+    // Logic to determine if jump should happen -- aka, PC should be loaded
+    // with value from A register
+    // First, check if ALU output is negative and negative jump bit is true
+    And(a=ng, b=instruction[2], out=negJump);
+    // Second, check if ALU output is 0 and 0 jump bit is true
+    And(a=zr, b=instruction[1], out=zeroJump);
+    // 3a, determine if neither ng or zr are true, thus ALU output is positive
+    Nor(a=ng, b=zr, out=ps);
+    // 3b, check it ALU output is positive and positive jump bit is true
+    And(a=ps, b=instruction[0], out=posJump);
+    // 4, jump if any of the above are true
+    Or(a=negJump, b=zeroJump, out=negOrZeroJump);
+    Or(a=negOrZeroJump, b=posJump, out=mayJump);
+    // 5, only jump if c instruction
+    And(a=mayJump, b=instruction[15], out=loadPc);
+    // program counter
+    PC(in=aRegisterOut, load=loadPc, inc=true, reset=reset, out[0..14]=pc);
 }
