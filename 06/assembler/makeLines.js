@@ -7,7 +7,7 @@ class MakeLines extends Transform {
 
   _transform(chunk, encoding, done) {
     let data = chunk.toString();
-    if (this._lastLine) data = this.lastLine + data;
+    if (this._lastLine) data = this._lastLine + data;
     const lines = data.split('\n');
     this._lastLine = lines.splice(lines.length - 1, 1)[0];
     lines.forEach(this.push.bind(this));
