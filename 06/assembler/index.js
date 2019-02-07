@@ -1,9 +1,9 @@
 const { createReadStream, createWriteStream, unlinkSync } = require('fs');
 const { promisify } = require('util');
 const { pipeline } = require('stream');
-const { parser } = require('./parser');
-const { MakeLines } = require('./makeLines');
-const { cleanupParser } = require('./cleanupParser');
+const { parser } = require('./src/parser');
+const { MakeLines } = require('./src/makeLines');
+const { cleanupParser } = require('./src/cleanupParser');
 
 const pipePromise = promisify(pipeline);
 
