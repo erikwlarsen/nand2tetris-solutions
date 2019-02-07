@@ -1,12 +1,14 @@
 const convertToBinary = number => padZeroes(number.toString(2));
 
-const padZeroes = str => {
-  while (str.length < 16) {
-    str = '0' + str;
+const padZeroes = (str) => {
+  let padStr = str;
+  while (padStr.length < 16) {
+    padStr = '0'.concat(padStr);
   }
-  return str;
-}
+  return padStr;
+};
 
 module.exports = {
-  convertToBinary, padZeroes
-}
+  convertToBinary,
+  padZeroes,
+};

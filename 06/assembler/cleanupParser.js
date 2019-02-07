@@ -2,12 +2,12 @@ const { Transform } = require('stream');
 const symbolTable = require('./symbolTable')();
 const { convertToBinary } = require('./utils');
 
-const testForBinary = str => {
+const testForBinary = (str) => {
   const binarySet = new Set(['0', '1']);
-  str = str.split('').filter(s => s !== '\n').join('');
+  const filteredStr = str.split('').filter(s => s !== '\n').join('');
   return (
-    str.length === 16 &&
-    str.split('').every(char => binarySet.has(char))
+    filteredStr.length === 16
+    && filteredStr.split('').every(char => binarySet.has(char))
   );
 };
 
@@ -21,13 +21,14 @@ const parseChunk = ({ chunk, varRegister }) => {
       ? convertToBinary(address)
       : storeSymbol({ chunk, varRegister });
   }
+  return null;
 };
 
 const storeSymbol = ({ chunk, varRegister }) => {
   symbolTable.addEntry(chunk, varRegister);
   cleanupParser.emit('incrementVarRegister');
   return convertToBinary(varRegister);
-}
+};
 
 class CleanupParser extends Transform {
   constructor() {
@@ -37,15 +38,16 @@ class CleanupParser extends Transform {
   }
 
   _transform(chunk, encoding, done) {
-    chunk = String(chunk);
-    const parsedData = parseChunk({ chunk, varRegister: this.varRegister });
-    this.push((parsedData || chunk) + '\n');
+    const strChunk = String(chunk);
+    const parsedData = parseChunk({ chunk: strChunk, varRegister: this.varRegister });
+    this.push((parsedData || strChunk).concat('\n'));
     done();
   }
-
 }
 
 const cleanupParser = new CleanupParser();
-cleanupParser.on('incrementVarRegister', () => cleanupParser.varRegister += 1);
+cleanupParser.on('incrementVarRegister', () => {
+  cleanupParser.varRegister += 1;
+});
 
 module.exports = { cleanupParser };

@@ -19,7 +19,7 @@ class SymbolTable {
 let symbolTable;
 module.exports = () => {
   if (!symbolTable) {
-    return symbolTable = new SymbolTable();
+    symbolTable = new SymbolTable();
   }
   return symbolTable;
-}
+};

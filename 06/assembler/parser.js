@@ -5,16 +5,12 @@ const {
   registers,
   jumps,
   DEST_NULL,
-  comps
+  comps,
 } = require('./constants');
 const symbolTable = require('./symbolTable')();
 const { convertToBinary } = require('./utils');
 
-const stripString = ({ chunk }) => {
-  return chunk
-    .replace(regex.COMMENT, '')
-    .replace(regex.WHITESPACE, '');
-};
+const stripString = ({ chunk }) => chunk.replace(regex.COMMENT, '').replace(regex.WHITESPACE, '');
 
 const getCommandType = ({ command }) => {
   switch (true) {
@@ -54,7 +50,7 @@ const parseACommand = ({ command }) => {
       : symbolTable.getAddress(register);
   return typeof registerNum === 'number'
     ? convertToBinary(registerNum)
-    : register
+    : register;
 };
 
 const getBinComp = ({ comp }) => {
@@ -68,11 +64,9 @@ const getBinDest = ({ dest }) => {
   const d = dest.includes('D') ? '1' : '0';
   const m = dest.includes('M') ? '1' : '0';
   return a + d + m;
-}
-
-const getBinJump = ({ jump }) => {
-  return jump ? jumps[jump] : jumps.NULL;
 };
+
+const getBinJump = ({ jump }) => (jump ? jumps[jump] : jumps.NULL);
 
 const parseCCommand = ({ command }) => {
   // Initialize binary command with first 3 digits for all C commands
@@ -98,7 +92,7 @@ const parseLCommand = ({ command, line }) => {
   return null;
 };
 
-const addNewLine = val => val + '\n';
+const addNewLine = val => val.concat('\n');
 
 class Parser extends Transform {
   constructor() {
@@ -107,8 +101,8 @@ class Parser extends Transform {
   }
 
   _transform(chunk, encoding, done) {
-    chunk = String(chunk);
-    const command = stripString({ chunk });
+    const chunkStr = String(chunk);
+    const command = stripString({ chunk: chunkStr });
     if (!command.length) return done();
     const commandType = getCommandType({ command });
     const pushValue = getPushValue({ command, commandType, line: this.line });
@@ -116,7 +110,7 @@ class Parser extends Transform {
       this.line += 1;
       this.push(addNewLine(pushValue));
     }
-    done();
+    return done();
   }
 }
 
