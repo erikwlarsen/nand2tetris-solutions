@@ -2,7 +2,10 @@ const { Transform } = require('stream');
 const {
   commands,
   regex,
-  registers
+  registers,
+  jumps,
+  DEST_NULL,
+  comps
 } = require('./constants');
 const symbolTable = require('./symbolTable')();
 const { convertToBinary } = require('./utils');
@@ -54,8 +57,38 @@ const parseACommand = ({ command }) => {
     : register
 };
 
+const getBinComp = ({ comp }) => {
+  if (!comp) throw new Error('Comp information missing in C command');
+  return comps[comp];
+};
+
+const getBinDest = ({ dest }) => {
+  if (!dest) return DEST_NULL;
+  const a = dest.includes('A') ? '1' : '0';
+  const d = dest.includes('D') ? '1' : '0';
+  const m = dest.includes('M') ? '1' : '0';
+  return a + d + m;
+}
+
+const getBinJump = ({ jump }) => {
+  return jump ? jumps[jump] : jumps.NULL;
+};
+
 const parseCCommand = ({ command }) => {
-  return command;
+  // Initialize binary command with first 3 digits for all C commands
+  const binStart = '111';
+  // Command format: dest=comp;jump
+  const [destAndComp, jump] = command.split(';');
+  let [dest, comp] = destAndComp.split('=');
+  // If there is no equals sign, then there is no dest
+  if (!comp) {
+    comp = dest;
+    dest = null;
+  }
+  const binComp = getBinComp({ comp });
+  const binDest = getBinDest({ dest });
+  const binJump = getBinJump({ jump });
+  return binStart + binComp + binDest + binJump;
 };
 
 const parseLCommand = ({ command, line }) => {
