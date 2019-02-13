@@ -1,5 +1,5 @@
 const { Transform } = require('stream');
-const { commandTypes, arithmeticCmds } = require('./constants');
+const { commandTypes, arithmeticCmds, segments } = require('./constants');
 
 /**
  * CodeWriter extends node's Transform stream and parses incoming objects
@@ -126,22 +126,111 @@ class CodeWriter extends Transform {
     return label;
   }
 
-  _writePushPop({
-    commandType,
+  _writePush({
     segment,
     index,
     done,
   }) {
-    if (commandType === commandTypes.C_PUSH) {
-      if (segment === 'constant') {
+    switch (segment) {
+      case segments.CONSTANT:
         this._loadConstant(index);
         this._loadAIntoD();
-      }
-      this._loadContentsOfStackPointer();
-      this._loadDIntoM();
-      this._incrementStackPointer();
+        break;
+      case segments.LOCAL:
+        this._loadContentsOfLocal(index);
+        break;
+      case segments.ARGUMENT:
+        this._loadContentsOfArgument(index);
+        break;
+      case segments.THIS:
+        this._loadContentsOfThis(index);
+        break;
+      case segments.THAT:
+        this._loadContentsOfThat(index);
+        break;
+      case segments.POINTER:
+      case segments.TEMP:
+      case segments.STATIC:
+      default:
     }
+    this._loadContentsOfStackPointer();
+    this._loadDIntoM();
+    this._incrementStackPointer();
     return done();
+  }
+
+  _writePop({
+    segment,
+    index,
+    done,
+  }) {
+    this._loadContentsOfStackPointer();
+    this._loadMIntoD();
+    switch (segment) {
+      case segments.LOCAL:
+        break;
+      case segments.ARGUMENT:
+        break;
+      case segments.THIS:
+        break;
+      case segments.THAT:
+        break;
+      case segments.POINTER:
+      case segments.TEMP:
+      case segments.STATIC:
+      default:
+    }
+    this._loadDIntoM();
+    this._decrementStackPointer();
+    return done();
+  }
+
+  _loadContentsOfLocal(index) {
+    this._loadConstant(index);
+    this._loadAIntoD();
+    this._loadAddressOfLocal();
+    this.push('A=M+D\n'); // get pointer to correct local location
+    this._loadMIntoD();
+  }
+
+  _loadAddressOfLocal() {
+    this.push('@LCL\n');
+  }
+
+  _loadContentsOfArgument(index) {
+    this._loadConstant(index);
+    this._loadAIntoD();
+    this._loadAddressOfArgument();
+    this.push('A=M+D\n');
+    this._loadMIntoD();
+  }
+
+  _loadAddressOfArgument() {
+    this.push('@ARG\n');
+  }
+
+  _loadContentsOfThis(index) {
+    this._loadConstant(index);
+    this._loadAIntoD();
+    this._loadAddressOfThis();
+    this.push('A=M+D\n');
+    this._loadMIntoD();
+  }
+
+  _loadAddressOfThis() {
+    this.push('@THIS\n');
+  }
+
+  _loadContentsOfThat(index) {
+    this._loadConstant(index);
+    this._loadAIntoD();
+    this._loadAddressOfThat();
+    this.push('A=M+D\n');
+    this._loadMIntoD();
+  }
+
+  _loadAddressOfThat() {
+    this.push('@THAT\n');
   }
 
   _setMToFalse() {
@@ -219,9 +308,13 @@ class CodeWriter extends Transform {
       case commandTypes.C_ARITHMETIC:
         return this._writeArithmetic({ command: arg1, done });
       case commandTypes.C_PUSH:
+        return this._writePush({
+          segment: arg1,
+          index: arg2,
+          done,
+        });
       case commandTypes.C_POP:
-        return this._writePushPop({
-          commandType,
+        return this._writePop({
           segment: arg1,
           index: arg2,
           done,

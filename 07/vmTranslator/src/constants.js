@@ -21,4 +21,14 @@ module.exports = {
     OR: 'or',
     NOT: 'not',
   },
+  segments: {
+    CONSTANT: 'constant',
+    LOCAL: 'local',
+    ARGUMENT: 'argument',
+    THIS: 'this',
+    THAT: 'that',
+    POINTER: 'pointer',
+    TEMP: 'temp',
+    STATIC: 'static',
+  },
 };
