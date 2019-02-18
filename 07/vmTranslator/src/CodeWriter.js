@@ -149,7 +149,11 @@ class CodeWriter extends Transform {
         this._loadContentsOfThat(index);
         break;
       case segments.POINTER:
+        this._loadContentsOfPointer(index);
+        break;
       case segments.TEMP:
+        this._loadContentsOfTemp(index);
+        break;
       case segments.STATIC:
       default:
     }
@@ -164,24 +168,63 @@ class CodeWriter extends Transform {
     index,
     done,
   }) {
-    this._loadContentsOfStackPointer();
-    this._loadMIntoD();
+    /**
+     * Basic strategy for popping:
+     * 1) calculate memory register that will be popped from and store in @'R13'
+     * 2) decrement stack pointer
+     * 3) get contents of stack pointer and put in D
+     * 4) load contents of @'R13' into A
+     * 5) set M equal to D
+     * Pointer and Temp follow slightly simpler pattern, as their address can
+     * be immediately calculated mathematically
+     */
     switch (segment) {
       case segments.LOCAL:
+        this._loadConstant(index);
+        this._loadAIntoD();
+        this._loadAddressOfLocal();
         break;
       case segments.ARGUMENT:
+        this._loadConstant(index);
+        this._loadAIntoD();
+        this._loadAddressOfArgument();
         break;
       case segments.THIS:
+        this._loadConstant(index);
+        this._loadAIntoD();
+        this._loadAddressOfThis();
         break;
       case segments.THAT:
+        this._loadConstant(index);
+        this._loadAIntoD();
+        this._loadAddressOfThat();
         break;
       case segments.POINTER:
+        this._decrementStackPointer();
+        this._loadMIntoA();
+        this._loadMIntoD();
+        this._loadConstant(`R${3 + Number(index)}`);
+        this._loadDIntoM();
+        return done();
       case segments.TEMP:
+        this._decrementStackPointer();
+        this._loadMIntoA();
+        this._loadMIntoD();
+        this._loadConstant(`R${5 + Number(index)}`);
+        this._loadDIntoM();
+        return done();
       case segments.STATIC:
       default:
     }
+    this.push('D=M+D\n');
+    this._loadConstant('R13');
     this._loadDIntoM();
     this._decrementStackPointer();
+    this._loadMIntoA();
+    this._loadMIntoD();
+    this._loadConstant('R13');
+    this._loadMIntoA();
+    this._loadDIntoM();
     return done();
   }
 
@@ -231,6 +274,16 @@ class CodeWriter extends Transform {
 
   _loadAddressOfThat() {
     this.push('@THAT\n');
+  }
+
+  _loadContentsOfTemp(index) {
+    this._loadConstant(`R${5 + Number(index)}`);
+    this._loadMIntoD();
+  }
+
+  _loadContentsOfPointer(index) {
+    this._loadConstant(`R${3 + Number(index)}`);
+    this._loadMIntoD();
   }
 
   _setMToFalse() {
@@ -301,9 +354,9 @@ class CodeWriter extends Transform {
   }
 
   _transform({ commandType, arg1, arg2 }, encoding, done) {
-    if (!this._initialized) {
-      this._initializeStream();
-    }
+    // if (!this._initialized) {
+    //   this._initializeStream();
+    // }
     switch (commandType) {
       case commandTypes.C_ARITHMETIC:
         return this._writeArithmetic({ command: arg1, done });
