@@ -37,26 +37,24 @@ switch (filePath[filePath.length - 1]) {
     outputPath = filePath.concat('.asm');
 }
 
-(async function vmTranslator() {
-  try {
-    if (existsSync(outputPath)) unlinkSync(outputPath);
-    await filePaths.reduce(async (prevProm, file) => {
-      // because airbnb does not like for-of loops!
-      await prevProm;
-      const filePathArr = file.split('/');
-      // extract file name without extension for naming static variables
-      const [className] = filePathArr[filePathArr.length - 1].split('.vm');
-      const readStream = createReadStream(file);
-      const writeStream = createWriteStream(outputPath, { flags: 'a' });
-      return pipePromise(
-        readStream,
-        new MakeLines(),
-        new Parser(),
-        new CodeWriter({ className }),
-        writeStream,
-      );
-    }, Promise.resolve());
-  } catch (err) {
-    throw err;
-  }
-}());
+try {
+  if (existsSync(outputPath)) unlinkSync(outputPath);
+  filePaths.reduce(async (prevProm, file) => {
+    // because airbnb does not like for-of loops!
+    await prevProm;
+    const filePathArr = file.split('/');
+    // extract file name without extension for naming static variables
+    const [className] = filePathArr[filePathArr.length - 1].split('.vm');
+    const readStream = createReadStream(file);
+    const writeStream = createWriteStream(outputPath, { flags: 'a' });
+    return pipePromise(
+      readStream,
+      new MakeLines(),
+      new Parser(),
+      new CodeWriter({ className }),
+      writeStream,
+    );
+  }, Promise.resolve());
+} catch (err) {
+  throw err;
+}
