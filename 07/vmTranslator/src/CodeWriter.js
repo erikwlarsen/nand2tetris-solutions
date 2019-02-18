@@ -8,10 +8,11 @@ const { commandTypes, arithmeticCmds, segments } = require('./constants');
  * VM file -> MakeLines -> Parser -> CodeWriter -> Hack asm file
  */
 class CodeWriter extends Transform {
-  constructor() {
+  constructor({ className }) {
     super({ writableObjectMode: true });
     this._initialized = false;
-    this.jumpCounter = 0;
+    this._jumpCounter = 0;
+    this._className = className;
   }
 
   _initializeStream() {
@@ -121,8 +122,8 @@ class CodeWriter extends Transform {
   }
 
   _createJumpLabel() {
-    const label = `RET${this.jumpCounter}`;
-    this.jumpCounter += 1;
+    const label = `RET${this._jumpCounter}`;
+    this._jumpCounter += 1;
     return label;
   }
 
@@ -155,6 +156,8 @@ class CodeWriter extends Transform {
         this._loadContentsOfTemp(index);
         break;
       case segments.STATIC:
+        this._loadContentsOfStatic(index);
+        break;
       default:
     }
     this._loadContentsOfStackPointer();
@@ -214,6 +217,12 @@ class CodeWriter extends Transform {
         this._loadDIntoM();
         return done();
       case segments.STATIC:
+        this._decrementStackPointer();
+        this._loadMIntoA();
+        this._loadMIntoD();
+        this._loadConstant(`${this._className}.${index}`);
+        this._loadDIntoM();
+        return done();
       default:
     }
     this.push('D=M+D\n');
@@ -286,6 +295,11 @@ class CodeWriter extends Transform {
     this._loadMIntoD();
   }
 
+  _loadContentsOfStatic(index) {
+    this._loadConstant(`${this._className}.${index}`);
+    this._loadMIntoD();
+  }
+
   _setMToFalse() {
     this.push('M=0\n');
   }
@@ -329,8 +343,8 @@ class CodeWriter extends Transform {
     this.push('0;JMP\n');
   }
 
-  _loadConstant(num) {
-    this.push(`@${num}\n`);
+  _loadConstant(constant) {
+    this.push(`@${constant}\n`);
   }
 
   _loadAddressOfStackPointer() {
