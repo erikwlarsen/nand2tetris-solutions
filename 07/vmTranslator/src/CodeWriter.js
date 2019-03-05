@@ -17,6 +17,48 @@ class CodeWriter extends Transform {
     this._rh = new ReadableHelper(this);
   }
 
+  _transform({ commandType, arg1, arg2 }, encoding, done) {
+    // if (!this._initialized) {
+    //   this._initializeStream();
+    // }
+    switch (commandType) {
+      case commandTypes.C_ARITHMETIC:
+        return this._writeArithmetic({ command: arg1, done });
+      case commandTypes.C_PUSH:
+        return this._writePush({
+          segment: arg1,
+          index: arg2,
+          done,
+        });
+      case commandTypes.C_POP:
+        return this._writePop({
+          segment: arg1,
+          index: arg2,
+          done,
+        });
+      case commandTypes.C_LABEL:
+        return this._writeLabel({
+          label: arg1,
+          done,
+        });
+      case commandTypes.C_GOTO:
+        return this._writeGoto({
+          label: arg1,
+          done,
+        });
+      case commandTypes.C_IF:
+        return this._writeIfGoto({
+          label: arg1,
+          done,
+        });
+      case commandTypes.C_FUNCTION:
+      case commandTypes.C_CALL:
+      case commandTypes.C_RETURN:
+      default:
+        return done();
+    }
+  }
+
   _initializeStream() {
     this._rh.loadConstant(256);
     this._rh.loadAIntoD();
@@ -239,34 +281,24 @@ class CodeWriter extends Transform {
     return done();
   }
 
-  _transform({ commandType, arg1, arg2 }, encoding, done) {
-    // if (!this._initialized) {
-    //   this._initializeStream();
-    // }
-    switch (commandType) {
-      case commandTypes.C_ARITHMETIC:
-        return this._writeArithmetic({ command: arg1, done });
-      case commandTypes.C_PUSH:
-        return this._writePush({
-          segment: arg1,
-          index: arg2,
-          done,
-        });
-      case commandTypes.C_POP:
-        return this._writePop({
-          segment: arg1,
-          index: arg2,
-          done,
-        });
-      case commandTypes.C_LABEL:
-      case commandTypes.C_GOTO:
-      case commandTypes.C_IF:
-      case commandTypes.C_FUNCTION:
-      case commandTypes.C_CALL:
-      case commandTypes.C_RETURN:
-      default:
-        return done();
-    }
+  _writeLabel({ label, done }) {
+    this._rh.addJumpLabel(label);
+    return done();
+  }
+
+  _writeGoto({ label, done }) {
+    this._rh.loadConstant(label);
+    this._rh.jump();
+    return done();
+  }
+
+  _writeIfGoto({ label, done }) {
+    this._rh.decrementStackPointer();
+    this._rh.loadContentsOfStackPointer();
+    this._rh.loadMIntoD();
+    this._rh.loadConstant(label);
+    this._rh.jumpIfGt();
+    return done();
   }
 }
 

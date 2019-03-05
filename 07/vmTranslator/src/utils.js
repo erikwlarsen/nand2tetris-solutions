@@ -16,12 +16,12 @@ const commandRegex = [
   { type: C_PUSH, regex: /^push/ },
   { type: C_POP, regex: /^pop/ },
   { type: C_ARITHMETIC, regex: /^(add|sub|neg|eq|gt|lt|and|or|not)/ },
-  { type: C_CALL, regex: /notimplementedyet/ },
-  { type: C_FUNCTION, regex: /notimplementedyet/ },
-  { type: C_GOTO, regex: /notimplementedyet/ },
-  { type: C_IF, regex: /notimplementedyet/ },
-  { type: C_LABEL, regex: /notimplementedyet/ },
-  { type: C_RETURN, regex: /notimplementedyet/ },
+  { type: C_CALL, regex: /^call/ },
+  { type: C_FUNCTION, regex: /^function/ },
+  { type: C_GOTO, regex: /^goto/ },
+  { type: C_IF, regex: /^if-goto/ },
+  { type: C_LABEL, regex: /^label/ },
+  { type: C_RETURN, regex: /^return/ },
 ];
 
 const utilRegex = {

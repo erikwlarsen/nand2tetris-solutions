@@ -21,10 +21,10 @@ const getArgs = ({ line, commandType }) => {
     case commandTypes.C_LABEL:
     case commandTypes.C_GOTO:
     case commandTypes.C_IF:
-    case commandTypes.C_RETURN:
       [, arg1] = splitLine;
       arg2 = null;
       break;
+    case commandTypes.C_RETURN:
     default:
       arg1 = null;
       arg2 = null;

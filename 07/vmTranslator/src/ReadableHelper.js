@@ -66,15 +66,15 @@ class ReadableHelper {
     this.loadMIntoD();
   }
 
-  _setMToFalse() {
+  setMToFalse() {
     this._r.push('M=0\n');
   }
 
-  _setMToTrue() {
+  setMToTrue() {
     this._r.push('M=-1\n');
   }
 
-  _addJumpLabel(label) {
+  addJumpLabel(label) {
     this._r.push(`(${label})\n`);
   }
 
