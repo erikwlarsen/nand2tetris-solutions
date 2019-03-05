@@ -1,7 +1,8 @@
 *.out
 *.cmp
 *.tst
-*.txt
+file.txt
+more fun to go.txt
 *.pdf
 *.gif
 .DS_Store

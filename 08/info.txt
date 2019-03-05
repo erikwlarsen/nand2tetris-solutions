@@ -1,0 +1,2 @@
+NB: since chapter 8 extends on the VM translator started in chapter 7, all work can
+be found there. Наслаждайтесь!
