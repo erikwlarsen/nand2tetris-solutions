@@ -1,5 +1,6 @@
 const { Transform } = require('stream');
 const { commandTypes, arithmeticCmds, segments } = require('./constants');
+const { ReadableHelper } = require('./ReadableHelper');
 
 /**
  * CodeWriter extends node's Transform stream and parses incoming objects
@@ -13,13 +14,14 @@ class CodeWriter extends Transform {
     this._initialized = false;
     this._jumpCounter = 0;
     this._className = className;
+    this._rh = new ReadableHelper(this);
   }
 
   _initializeStream() {
-    this._loadConstant(256);
-    this._loadAIntoD();
-    this._loadAddressOfStackPointer();
-    this._loadDIntoM();
+    this._rh.loadConstant(256);
+    this._rh.loadAIntoD();
+    this._rh.loadAddressOfStackPointer();
+    this._rh.loadDIntoM();
     this._initialized = true;
   }
 
@@ -28,31 +30,31 @@ class CodeWriter extends Transform {
     let trueLabel;
     let continueLabel;
 
-    this._decrementStackPointer();
-    this._loadContentsOfStackPointer();
+    this._rh.decrementStackPointer();
+    this._rh.loadContentsOfStackPointer();
     switch (command) {
       case arithmeticCmds.ADD:
-        this._loadMIntoD();
-        this._decrementStackPointer();
-        this._loadContentsOfStackPointer();
+        this._rh.loadMIntoD();
+        this._rh.decrementStackPointer();
+        this._rh.loadContentsOfStackPointer();
         this.push('M=M+D\n');
         break;
       case arithmeticCmds.SUB:
-        this._loadMIntoD();
-        this._decrementStackPointer();
-        this._loadContentsOfStackPointer();
+        this._rh.loadMIntoD();
+        this._rh.decrementStackPointer();
+        this._rh.loadContentsOfStackPointer();
         this.push('M=M-D\n');
         break;
       case arithmeticCmds.AND:
-        this._loadMIntoD();
-        this._decrementStackPointer();
-        this._loadContentsOfStackPointer();
+        this._rh.loadMIntoD();
+        this._rh.decrementStackPointer();
+        this._rh.loadContentsOfStackPointer();
         this.push('M=D&M\n');
         break;
       case arithmeticCmds.OR:
-        this._loadMIntoD();
-        this._decrementStackPointer();
-        this._loadContentsOfStackPointer();
+        this._rh.loadMIntoD();
+        this._rh.decrementStackPointer();
+        this._rh.loadContentsOfStackPointer();
         this.push('M=D|M\n');
         break;
       case arithmeticCmds.NEG:
@@ -64,60 +66,60 @@ class CodeWriter extends Transform {
       case arithmeticCmds.EQ:
         trueLabel = this._createJumpLabel();
         continueLabel = this._createJumpLabel();
-        this._loadMIntoD();
-        this._decrementStackPointer();
-        this._loadContentsOfStackPointer();
+        this._rh.loadMIntoD();
+        this._rh.decrementStackPointer();
+        this._rh.loadContentsOfStackPointer();
         this.push('D=M-D\n');
-        this._loadConstant(trueLabel);
-        this._jumpIfZero();
-        this._loadContentsOfStackPointer();
-        this._setMToFalse();
-        this._loadConstant(continueLabel);
-        this._jump();
-        this._addJumpLabel(trueLabel);
-        this._loadContentsOfStackPointer();
-        this._setMToTrue();
-        this._addJumpLabel(continueLabel);
+        this._rh.loadConstant(trueLabel);
+        this._rh.jumpIfZero();
+        this._rh.loadContentsOfStackPointer();
+        this._rh.setMToFalse();
+        this._rh.loadConstant(continueLabel);
+        this._rh.jump();
+        this._rh.addJumpLabel(trueLabel);
+        this._rh.loadContentsOfStackPointer();
+        this._rh.setMToTrue();
+        this._rh.addJumpLabel(continueLabel);
         break;
       case arithmeticCmds.GT:
         trueLabel = this._createJumpLabel();
         continueLabel = this._createJumpLabel();
-        this._loadMIntoD();
-        this._decrementStackPointer();
-        this._loadContentsOfStackPointer();
+        this._rh.loadMIntoD();
+        this._rh.decrementStackPointer();
+        this._rh.loadContentsOfStackPointer();
         this.push('D=M-D\n');
-        this._loadConstant(trueLabel);
-        this._jumpIfGt();
-        this._loadContentsOfStackPointer();
-        this._setMToFalse();
-        this._loadConstant(continueLabel);
-        this._jump();
-        this._addJumpLabel(trueLabel);
-        this._loadContentsOfStackPointer();
-        this._setMToTrue();
-        this._addJumpLabel(continueLabel);
+        this._rh.loadConstant(trueLabel);
+        this._rh.jumpIfGt();
+        this._rh.loadContentsOfStackPointer();
+        this._rh.setMToFalse();
+        this._rh.loadConstant(continueLabel);
+        this._rh.jump();
+        this._rh.addJumpLabel(trueLabel);
+        this._rh.loadContentsOfStackPointer();
+        this._rh.setMToTrue();
+        this._rh.addJumpLabel(continueLabel);
         break;
       case arithmeticCmds.LT:
         trueLabel = this._createJumpLabel();
         continueLabel = this._createJumpLabel();
-        this._loadMIntoD();
-        this._decrementStackPointer();
-        this._loadContentsOfStackPointer();
+        this._rh.loadMIntoD();
+        this._rh.decrementStackPointer();
+        this._rh.loadContentsOfStackPointer();
         this.push('D=M-D\n');
-        this._loadConstant(trueLabel);
-        this._jumpIfLt();
-        this._loadContentsOfStackPointer();
-        this._setMToFalse();
-        this._loadConstant(continueLabel);
-        this._jump();
-        this._addJumpLabel(trueLabel);
-        this._loadContentsOfStackPointer();
-        this._setMToTrue();
-        this._addJumpLabel(continueLabel);
+        this._rh.loadConstant(trueLabel);
+        this._rh.jumpIfLt();
+        this._rh.loadContentsOfStackPointer();
+        this._rh.setMToFalse();
+        this._rh.loadConstant(continueLabel);
+        this._rh.jump();
+        this._rh.addJumpLabel(trueLabel);
+        this._rh.loadContentsOfStackPointer();
+        this._rh.setMToTrue();
+        this._rh.addJumpLabel(continueLabel);
         break;
       default:
     }
-    this._incrementStackPointer();
+    this._rh.incrementStackPointer();
     return done();
   }
 
@@ -134,237 +136,107 @@ class CodeWriter extends Transform {
   }) {
     switch (segment) {
       case segments.CONSTANT:
-        this._loadConstant(index);
-        this._loadAIntoD();
+        this._rh.loadConstant(index);
+        this._rh.loadAIntoD();
         break;
       case segments.LOCAL:
-        this._loadContentsOfLocal(index);
+        this._rh.loadContentsOfLocal(index);
         break;
       case segments.ARGUMENT:
-        this._loadContentsOfArgument(index);
+        this._rh.loadContentsOfArgument(index);
         break;
       case segments.THIS:
-        this._loadContentsOfThis(index);
+        this._rh.loadContentsOfThis(index);
         break;
       case segments.THAT:
-        this._loadContentsOfThat(index);
+        this._rh.loadContentsOfThat(index);
         break;
       case segments.POINTER:
-        this._loadContentsOfPointer(index);
+        this._rh.loadContentsOfPointer(index);
         break;
       case segments.TEMP:
-        this._loadContentsOfTemp(index);
+        this._rh.loadContentsOfTemp(index);
         break;
       case segments.STATIC:
-        this._loadContentsOfStatic(index);
+        this._rh.loadContentsOfStatic(index);
         break;
       default:
     }
-    this._loadContentsOfStackPointer();
-    this._loadDIntoM();
-    this._incrementStackPointer();
+    this._rh.loadContentsOfStackPointer();
+    this._rh.loadDIntoM();
+    this._rh.incrementStackPointer();
     return done();
   }
 
+  /**
+   * Basic strategy for popping:
+   * 1) calculate memory register that will be popped from and store in @'R13'.
+   * 2) decrement stack pointer.
+   * 3) get contents of stack pointer and put in D.
+   * 4) load contents of @'R13' into A.
+   * 5) set M equal to D.
+   * Pointer and Temp follow slightly simpler pattern, as their address can
+   * be immediately calculated mathematically.
+   */
   _writePop({
     segment,
     index,
     done,
   }) {
-    /**
-     * Basic strategy for popping:
-     * 1) calculate memory register that will be popped from and store in @'R13'
-     * 2) decrement stack pointer
-     * 3) get contents of stack pointer and put in D
-     * 4) load contents of @'R13' into A
-     * 5) set M equal to D
-     * Pointer and Temp follow slightly simpler pattern, as their address can
-     * be immediately calculated mathematically
-     */
     switch (segment) {
       case segments.LOCAL:
-        this._loadConstant(index);
-        this._loadAIntoD();
-        this._loadAddressOfLocal();
+        this._rh.loadConstant(index);
+        this._rh.loadAIntoD();
+        this._rh.loadAddressOfLocal();
         break;
       case segments.ARGUMENT:
-        this._loadConstant(index);
-        this._loadAIntoD();
-        this._loadAddressOfArgument();
+        this._rh.loadConstant(index);
+        this._rh.loadAIntoD();
+        this._rh.loadAddressOfArgument();
         break;
       case segments.THIS:
-        this._loadConstant(index);
-        this._loadAIntoD();
-        this._loadAddressOfThis();
+        this._rh.loadConstant(index);
+        this._rh.loadAIntoD();
+        this._rh.loadAddressOfThis();
         break;
       case segments.THAT:
-        this._loadConstant(index);
-        this._loadAIntoD();
-        this._loadAddressOfThat();
+        this._rh.loadConstant(index);
+        this._rh.loadAIntoD();
+        this._rh.loadAddressOfThat();
         break;
       case segments.POINTER:
-        this._decrementStackPointer();
-        this._loadMIntoA();
-        this._loadMIntoD();
-        this._loadConstant(`R${3 + Number(index)}`);
-        this._loadDIntoM();
+        this._rh.decrementStackPointer();
+        this._rh.loadMIntoA();
+        this._rh.loadMIntoD();
+        this._rh.loadConstant(`R${3 + Number(index)}`);
+        this._rh.loadDIntoM();
         return done();
       case segments.TEMP:
-        this._decrementStackPointer();
-        this._loadMIntoA();
-        this._loadMIntoD();
-        this._loadConstant(`R${5 + Number(index)}`);
-        this._loadDIntoM();
+        this._rh.decrementStackPointer();
+        this._rh.loadMIntoA();
+        this._rh.loadMIntoD();
+        this._rh.loadConstant(`R${5 + Number(index)}`);
+        this._rh.loadDIntoM();
         return done();
       case segments.STATIC:
-        this._decrementStackPointer();
-        this._loadMIntoA();
-        this._loadMIntoD();
-        this._loadConstant(`${this._className}.${index}`);
-        this._loadDIntoM();
+        this._rh.decrementStackPointer();
+        this._rh.loadMIntoA();
+        this._rh.loadMIntoD();
+        this._rh.loadConstant(`${this._rh.className}.${index}`);
+        this._rh.loadDIntoM();
         return done();
       default:
     }
     this.push('D=M+D\n');
-    this._loadConstant('R13');
-    this._loadDIntoM();
-    this._decrementStackPointer();
-    this._loadMIntoA();
-    this._loadMIntoD();
-    this._loadConstant('R13');
-    this._loadMIntoA();
-    this._loadDIntoM();
+    this._rh.loadConstant('R13');
+    this._rh.loadDIntoM();
+    this._rh.decrementStackPointer();
+    this._rh.loadMIntoA();
+    this._rh.loadMIntoD();
+    this._rh.loadConstant('R13');
+    this._rh.loadMIntoA();
+    this._rh.loadDIntoM();
     return done();
-  }
-
-  _loadContentsOfLocal(index) {
-    this._loadConstant(index);
-    this._loadAIntoD();
-    this._loadAddressOfLocal();
-    this.push('A=M+D\n'); // get pointer to correct local location
-    this._loadMIntoD();
-  }
-
-  _loadAddressOfLocal() {
-    this.push('@LCL\n');
-  }
-
-  _loadContentsOfArgument(index) {
-    this._loadConstant(index);
-    this._loadAIntoD();
-    this._loadAddressOfArgument();
-    this.push('A=M+D\n');
-    this._loadMIntoD();
-  }
-
-  _loadAddressOfArgument() {
-    this.push('@ARG\n');
-  }
-
-  _loadContentsOfThis(index) {
-    this._loadConstant(index);
-    this._loadAIntoD();
-    this._loadAddressOfThis();
-    this.push('A=M+D\n');
-    this._loadMIntoD();
-  }
-
-  _loadAddressOfThis() {
-    this.push('@THIS\n');
-  }
-
-  _loadContentsOfThat(index) {
-    this._loadConstant(index);
-    this._loadAIntoD();
-    this._loadAddressOfThat();
-    this.push('A=M+D\n');
-    this._loadMIntoD();
-  }
-
-  _loadAddressOfThat() {
-    this.push('@THAT\n');
-  }
-
-  _loadContentsOfTemp(index) {
-    this._loadConstant(`R${5 + Number(index)}`);
-    this._loadMIntoD();
-  }
-
-  _loadContentsOfPointer(index) {
-    this._loadConstant(`R${3 + Number(index)}`);
-    this._loadMIntoD();
-  }
-
-  _loadContentsOfStatic(index) {
-    this._loadConstant(`${this._className}.${index}`);
-    this._loadMIntoD();
-  }
-
-  _setMToFalse() {
-    this.push('M=0\n');
-  }
-
-  _setMToTrue() {
-    this.push('M=-1\n');
-  }
-
-  _addJumpLabel(label) {
-    this.push(`(${label})\n`);
-  }
-
-  _loadContentsOfStackPointer() {
-    this._loadAddressOfStackPointer();
-    this._loadMIntoA();
-  }
-
-  _incrementStackPointer() {
-    this._loadAddressOfStackPointer();
-    this.push('M=M+1\n');
-  }
-
-  _decrementStackPointer() {
-    this._loadAddressOfStackPointer();
-    this.push('M=M-1\n');
-  }
-
-  _jumpIfZero() {
-    this.push('D;JEQ\n');
-  }
-
-  _jumpIfGt() {
-    this.push('D;JGT\n');
-  }
-
-  _jumpIfLt() {
-    this.push('D;JLT\n');
-  }
-
-  _jump() {
-    this.push('0;JMP\n');
-  }
-
-  _loadConstant(constant) {
-    this.push(`@${constant}\n`);
-  }
-
-  _loadAddressOfStackPointer() {
-    this.push('@SP\n');
-  }
-
-  _loadDIntoM() {
-    this.push('M=D\n');
-  }
-
-  _loadAIntoD() {
-    this.push('D=A\n');
-  }
-
-  _loadMIntoA() {
-    this.push('A=M\n');
-  }
-
-  _loadMIntoD() {
-    this.push('D=M\n');
   }
 
   _transform({ commandType, arg1, arg2 }, encoding, done) {
@@ -386,6 +258,12 @@ class CodeWriter extends Transform {
           index: arg2,
           done,
         });
+      case commandTypes.C_LABEL:
+      case commandTypes.C_GOTO:
+      case commandTypes.C_IF:
+      case commandTypes.C_FUNCTION:
+      case commandTypes.C_CALL:
+      case commandTypes.C_RETURN:
       default:
         return done();
     }
