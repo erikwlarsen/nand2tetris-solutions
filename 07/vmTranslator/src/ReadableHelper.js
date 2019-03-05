@@ -83,6 +83,14 @@ class ReadableHelper {
     this.loadMIntoA();
   }
 
+  loadConstantOntoStack(constant) {
+    this.loadConstant(constant);
+    this.loadAIntoD();
+    this.loadContentsOfStackPointer();
+    this.loadDIntoM();
+    this.incrementStackPointer();
+  }
+
   incrementStackPointer() {
     this.loadAddressOfStackPointer();
     this._r.push('M=M+1\n');

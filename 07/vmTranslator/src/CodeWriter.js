@@ -52,8 +52,19 @@ class CodeWriter extends Transform {
           done,
         });
       case commandTypes.C_FUNCTION:
+        return this._writeFunction({
+          functionName: arg1,
+          numLocals: arg2,
+          done,
+        });
       case commandTypes.C_CALL:
+        return this._writeCall({
+          functionName: arg1,
+          numArgs: arg2,
+          done,
+        });
       case commandTypes.C_RETURN:
+        return this._writeReturn({ done });
       default:
         return done();
     }
@@ -264,7 +275,7 @@ class CodeWriter extends Transform {
         this._rh.decrementStackPointer();
         this._rh.loadMIntoA();
         this._rh.loadMIntoD();
-        this._rh.loadConstant(`${this._rh.className}.${index}`);
+        this._rh.loadConstant(`${this._className}.${index}`);
         this._rh.loadDIntoM();
         return done();
       default:
@@ -298,6 +309,36 @@ class CodeWriter extends Transform {
     this._rh.loadMIntoD();
     this._rh.loadConstant(label);
     this._rh.jumpIfGt();
+    return done();
+  }
+
+  _writeFunction({ functionName, numLocals, done }) {
+    this._rh.addJumpLabel(`${this._className}.${functionName}`);
+    // Initialize local variables to 0 ... is this right???
+    for (let i = Number(numLocals); i > 0; i -= 1) {
+      this._rh.loadConstantOntoStack(0);
+    }
+    return done();
+  }
+
+  _writeCall({ functionName, numArgs, done }) {
+    const returnLabel = this._createJumpLabel();
+    this._rh.loadConstantOntoStack(returnLabel);
+    this._rh.loadConstantOntoStack('LCL');
+    this._rh.loadConstantOntoStack('ARG');
+    this._rh.loadConstantOntoStack('THIS');
+    this._rh.loadConstantOntoStack('THAT');
+    // reposition ARG
+    // reposition LCL
+    this._rh.loadConstant(`${this._className}.${functionName}`);
+    this._rh.jump();
+    this._rh.addJumpLabel(returnLabel);
+    return done();
+  }
+
+  _writeReturn({ done }) {
+    
+
     return done();
   }
 }
