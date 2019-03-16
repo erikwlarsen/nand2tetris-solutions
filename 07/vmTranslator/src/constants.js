@@ -31,4 +31,5 @@ module.exports = {
     TEMP: 'temp',
     STATIC: 'static',
   },
+  SYS_INIT: 'Sys.init',
 };

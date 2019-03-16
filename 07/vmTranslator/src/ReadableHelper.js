@@ -140,6 +140,18 @@ class ReadableHelper {
   loadMIntoD() {
     this._r.push('D=M\n');
   }
+
+  loadDMinusOneIntoMAndD() {
+    this._r.push('MD=D-1');
+  }
+
+  restoreRegister(frame, register) {
+    this.loadConstant(frame);
+    this._r.push('AM=M-1\n');
+    this.loadMIntoD();
+    this.loadConstant(register);
+    this.loadDIntoM();
+  }
 }
 
 module.exports = { ReadableHelper };

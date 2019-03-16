@@ -1,5 +1,10 @@
 const { Transform } = require('stream');
-const { commandTypes, arithmeticCmds, segments } = require('./constants');
+const {
+  commandTypes,
+  arithmeticCmds,
+  segments,
+  SYS_INIT,
+} = require('./constants');
 const { ReadableHelper } = require('./ReadableHelper');
 
 /**
@@ -18,9 +23,9 @@ class CodeWriter extends Transform {
   }
 
   _transform({ commandType, arg1, arg2 }, encoding, done) {
-    // if (!this._initialized) {
-    //   this._initializeStream();
-    // }
+    if (!this._initialized) {
+      this._initializeStream();
+    }
     switch (commandType) {
       case commandTypes.C_ARITHMETIC:
         return this._writeArithmetic({ command: arg1, done });
@@ -75,6 +80,8 @@ class CodeWriter extends Transform {
     this._rh.loadAIntoD();
     this._rh.loadAddressOfStackPointer();
     this._rh.loadDIntoM();
+    this._rh.loadConstant(SYS_INIT);
+    this._rh.jump();
     this._initialized = true;
   }
 
@@ -314,7 +321,7 @@ class CodeWriter extends Transform {
 
   _writeFunction({ functionName, numLocals, done }) {
     this._rh.addJumpLabel(`${this._className}.${functionName}`);
-    // Initialize local variables to 0 ... is this right???
+    // Initialize local variables to 0
     for (let i = Number(numLocals); i > 0; i -= 1) {
       this._rh.loadConstantOntoStack(0);
     }
@@ -323,22 +330,82 @@ class CodeWriter extends Transform {
 
   _writeCall({ functionName, numArgs, done }) {
     const returnLabel = this._createJumpLabel();
+    // Put current context pointers in stack
     this._rh.loadConstantOntoStack(returnLabel);
     this._rh.loadConstantOntoStack('LCL');
     this._rh.loadConstantOntoStack('ARG');
     this._rh.loadConstantOntoStack('THIS');
     this._rh.loadConstantOntoStack('THAT');
-    // reposition ARG
+    // Set the ARG pointer back to (SP - (numArgs + current context pointers))
+    this._rh.loadConstant(numArgs);
+    this._rh.loadAIntoD();
+    this._rh.loadConstant(5); // # of current context pointers
+    this.push('D=D+A\n');
+    this._rh.loadAddressOfStackPointer();
+    this.push('D=M-D\n');
+    this._rh.loadAddressOfArgument();
+    this._rh.loadDIntoM();
     // reposition LCL
+    this._rh.loadAddressOfStackPointer();
+    this._rh.loadMIntoD();
+    this._rh.loadAddressOfLocal();
+    this._rh.loadDIntoM();
+    // Jump to function
     this._rh.loadConstant(`${this._className}.${functionName}`);
     this._rh.jump();
+    // Provide label to return to after function
     this._rh.addJumpLabel(returnLabel);
     return done();
   }
 
   _writeReturn({ done }) {
-    
-
+    /**
+     * Need to store the value on top of the stack (where LCL is pointing)
+     * in the location ARG is pointing, since this will be the top of
+     * the stack once we return to the calling function
+     * 1. Store address where ARG is pointing in extra register
+     * 2. Decrement stack pointer and store value at SP location in D (aka pop it!)
+     * 3. Store that value in the ARG register
+     */
+    this._rh.loadAddressOfArgument();
+    this._rh.loadMIntoD();
+    this._rh.loadConstant('R13');
+    this._rh.loadDIntoM();
+    this._rh.decrementStackPointer();
+    this._rh.loadMIntoA();
+    this._rh.loadMIntoD();
+    this._rh.loadConstant('R13');
+    this._rh.loadMIntoA();
+    this._rh.loadDIntoM();
+    /**
+     * Now that we have the return value ready, go about restoring the
+     * stack by doing the following:
+     * 1. Create a FRAME pointer variable from LCL pointer and store it.
+     * 2. Use decrementing FRAME pointer to pop THAT, THIS, ARG, and LCL
+     *    locations from outer function scope off the stack and restore them.
+     * 3. Last popped value will be return JMP value, use that to return to
+     *    outer function scope.
+     */
+    this._rh.loadAddressOfLocal();
+    this._rh.loadMIntoD();
+    this._rh.loadConstant('R13');
+    this._rh.loadDIntoM();
+    // Restore THAT
+    this.push('AM=M-1\n');
+    this._rh.loadMIntoD();
+    this._rh.loadAddressOfThat();
+    this._rh.loadDIntoM();
+    // Restore THIS
+    this._rh.restoreRegister('R13', 'THIS');
+    // Restore ARG
+    this._rh.restoreRegister('R13', 'ARG');
+    // Restore LCL
+    this._rh.restoreRegister('R13', 'LCL');
+    // Get return address and jump to it
+    this._rh.loadConstant('R13');
+    this.push('AM=M-1\n');
+    this._rh.loadMIntoA();
+    this._rh.jump();
     return done();
   }
 }
