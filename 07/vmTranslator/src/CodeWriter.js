@@ -14,9 +14,10 @@ const { ReadableHelper } = require('./ReadableHelper');
  * VM file -> MakeLines -> Parser -> CodeWriter -> Hack asm file
  */
 class CodeWriter extends Transform {
-  constructor({ className }) {
+  constructor({ className, init }) {
     super({ writableObjectMode: true });
-    this._initialized = false;
+    // Set _initialized to false if there is no init flag so that stream is initialized
+    this._initialized = !init;
     this._jumpCounter = 0;
     this._className = className;
     this._rh = new ReadableHelper(this);

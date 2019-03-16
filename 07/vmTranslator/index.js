@@ -17,6 +17,7 @@ const { vmFileRegex } = require('./src/utils');
 const pipePromise = promisify(pipeline);
 
 const filePath = process.argv[2];
+const init = process.argv[3] === 'init';
 const isDirectory = lstatSync(filePath).isDirectory();
 
 const filePaths = isDirectory
@@ -51,7 +52,7 @@ try {
       readStream,
       new MakeLines(),
       new Parser(),
-      new CodeWriter({ className }),
+      new CodeWriter({ className, init }),
       writeStream,
     );
   }, Promise.resolve());
