@@ -321,7 +321,7 @@ class CodeWriter extends Transform {
   }
 
   _writeFunction({ functionName, numLocals, done }) {
-    this._rh.addJumpLabel(`${this._className}.${functionName}`);
+    this._rh.addJumpLabel(functionName);
     // Initialize local variables to 0
     for (let i = Number(numLocals); i > 0; i -= 1) {
       this._rh.loadConstantOntoStack(0);
@@ -352,7 +352,7 @@ class CodeWriter extends Transform {
     this._rh.loadAddressOfLocal();
     this._rh.loadDIntoM();
     // Jump to function
-    this._rh.loadConstant(`${this._className}.${functionName}`);
+    this._rh.loadConstant(functionName);
     this._rh.jump();
     // Provide label to return to after function
     this._rh.addJumpLabel(returnLabel);

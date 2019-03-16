@@ -27,9 +27,11 @@ const filePaths = isDirectory
   : [filePath];
 
 let outputPath;
+const fileArr = filePath.split('/');
+const name = fileArr[fileArr.length - 2];
 switch (filePath[filePath.length - 1]) {
   case '/':
-    outputPath = filePath.slice(0, filePath.length - 1).concat('.asm');
+    outputPath = filePath.concat(`${name}.asm`);
     break;
   case 'm': // assume this is vm extension
     outputPath = filePath.slice(0, filePath.length - 3).concat('.asm');
