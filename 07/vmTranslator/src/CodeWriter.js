@@ -119,10 +119,10 @@ class CodeWriter extends Transform {
         this.push('M=D|M\n');
         break;
       case arithmeticCmds.NEG:
-        this.push('M=!M\n');
+        this.push('M=-M\n');
         break;
       case arithmeticCmds.NOT:
-        this.push('M=-M\n');
+        this.push('M=!M\n');
         break;
       case arithmeticCmds.EQ:
         trueLabel = this._createJumpLabel();
@@ -364,20 +364,20 @@ class CodeWriter extends Transform {
      * Need to store the value on top of the stack (where LCL is pointing)
      * in the location ARG is pointing, since this will be the top of
      * the stack once we return to the calling function
-     * 1. Store address where ARG is pointing in extra register
-     * 2. Decrement stack pointer and store value at SP location in D (aka pop it!)
-     * 3. Store that value in the ARG register
+     * 1. Decrement stack pointer and store value at SP location in D (aka pop it!)
+     * 2. Store that value in the ARG register
+     * 3. Set stack pointer to be pointing to ARG + 1
      */
-    this._rh.loadAddressOfArgument();
-    this._rh.loadMIntoD();
-    this._rh.loadConstant('R13');
-    this._rh.loadDIntoM();
+
     this._rh.decrementStackPointer();
     this._rh.loadMIntoA();
     this._rh.loadMIntoD();
-    this._rh.loadConstant('R13');
+    this._rh.loadAddressOfArgument();
     this._rh.loadMIntoA();
     this._rh.loadDIntoM();
+    this._rh.loadAIntoD();
+    this._rh.loadAddressOfStackPointer();
+    this.push('M=D+1\n');
     /**
      * Now that we have the return value ready, go about restoring the
      * stack by doing the following:
