@@ -83,6 +83,14 @@ class ReadableHelper {
     this.loadMIntoA();
   }
 
+  loadPointerValueOntoStack(pointer) {
+    this.loadConstant(pointer);
+    this.loadMIntoD();
+    this.loadContentsOfStackPointer();
+    this.loadDIntoM();
+    this.incrementStackPointer();
+  }
+
   loadConstantOntoStack(constant) {
     this.loadConstant(constant);
     this.loadAIntoD();

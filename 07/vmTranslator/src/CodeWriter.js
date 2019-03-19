@@ -7,6 +7,7 @@ const {
 } = require('./constants');
 const { ReadableHelper } = require('./ReadableHelper');
 
+const noop = () => {};
 /**
  * CodeWriter extends node's Transform stream and parses incoming objects
  * describing lines of VM code into Hack assembly code
@@ -81,8 +82,26 @@ class CodeWriter extends Transform {
     this._rh.loadAIntoD();
     this._rh.loadAddressOfStackPointer();
     this._rh.loadDIntoM();
-    this._rh.loadConstant(SYS_INIT);
-    this._rh.jump();
+    // Load illegal values into pointers to see if they are used
+    // before they are initialized.
+    this._rh.loadConstant(1);
+    this.push('D=-A\n');
+    this._rh.loadAddressOfLocal();
+    this._rh.loadDIntoM();
+    this._rh.loadConstant(2);
+    this.push('D=-A\n');
+    this._rh.loadAddressOfArgument();
+    this._rh.loadDIntoM();
+    this._rh.loadConstant(3);
+    this.push('D=-A\n');
+    this._rh.loadAddressOfThis();
+    this._rh.loadDIntoM();
+    this._rh.loadConstant(4);
+    this.push('D=-A\n');
+    this._rh.loadAddressOfThat();
+    this._rh.loadDIntoM();
+    // Call Sys.init function
+    this._writeCall({ functionName: SYS_INIT, numArgs: 0, done: noop });
     this._initialized = true;
   }
 
@@ -332,11 +351,15 @@ class CodeWriter extends Transform {
   _writeCall({ functionName, numArgs, done }) {
     const returnLabel = this._createJumpLabel();
     // Put current context pointers in stack
-    this._rh.loadConstantOntoStack(returnLabel);
-    this._rh.loadConstantOntoStack('LCL');
-    this._rh.loadConstantOntoStack('ARG');
-    this._rh.loadConstantOntoStack('THIS');
-    this._rh.loadConstantOntoStack('THAT');
+    this._rh.loadConstant(returnLabel);
+    this._rh.loadAIntoD();
+    this._rh.loadContentsOfStackPointer();
+    this._rh.loadDIntoM();
+    this._rh.incrementStackPointer();
+    this._rh.loadPointerValueOntoStack('LCL');
+    this._rh.loadPointerValueOntoStack('ARG');
+    this._rh.loadPointerValueOntoStack('THIS');
+    this._rh.loadPointerValueOntoStack('THAT');
     // Set the ARG pointer back to (SP - (numArgs + current context pointers))
     this._rh.loadConstant(numArgs);
     this._rh.loadAIntoD();
@@ -361,6 +384,24 @@ class CodeWriter extends Transform {
 
   _writeReturn({ done }) {
     /**
+     * First of all, create the FRAME pointer value and use it to grab the return
+     * label. It will initially point the same place as LCL. Need to grab this now,
+     * since in cases where there are no arguments for the current function call it
+     * will be overwritten by the next steps.
+     */
+    this._rh.loadAddressOfLocal();
+    this._rh.loadMIntoD();
+    // put FRAME in R13
+    this._rh.loadConstant('R13');
+    this._rh.loadDIntoM();
+    // Use FRAME - 5 to retrieve the value of the return label
+    this._rh.loadConstant(5);
+    this.push('A=D-A\n');
+    this._rh.loadMIntoD();
+    // put return label in R14
+    this._rh.loadConstant('R14');
+    this._rh.loadDIntoM();
+    /**
      * Need to store the value on top of the stack (where LCL is pointing)
      * in the location ARG is pointing, since this will be the top of
      * the stack once we return to the calling function
@@ -384,18 +425,10 @@ class CodeWriter extends Transform {
      * 1. Create a FRAME pointer variable from LCL pointer and store it.
      * 2. Use decrementing FRAME pointer to pop THAT, THIS, ARG, and LCL
      *    locations from outer function scope off the stack and restore them.
-     * 3. Last popped value will be return JMP value, use that to return to
-     *    outer function scope.
+     * 3. Finally, load the return label from R14 and JUMP!
      */
-    this._rh.loadAddressOfLocal();
-    this._rh.loadMIntoD();
-    this._rh.loadConstant('R13');
-    this._rh.loadDIntoM();
     // Restore THAT
-    this.push('AM=M-1\n');
-    this._rh.loadMIntoD();
-    this._rh.loadAddressOfThat();
-    this._rh.loadDIntoM();
+    this._rh.restoreRegister('R13', 'THAT');
     // Restore THIS
     this._rh.restoreRegister('R13', 'THIS');
     // Restore ARG
@@ -403,8 +436,7 @@ class CodeWriter extends Transform {
     // Restore LCL
     this._rh.restoreRegister('R13', 'LCL');
     // Get return address and jump to it
-    this._rh.loadConstant('R13');
-    this.push('AM=M-1\n');
+    this._rh.loadConstant('R14');
     this._rh.loadMIntoA();
     this._rh.jump();
     return done();
