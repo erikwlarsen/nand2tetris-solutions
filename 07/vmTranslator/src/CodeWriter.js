@@ -204,7 +204,7 @@ class CodeWriter extends Transform {
   }
 
   _createJumpLabel() {
-    const label = `RET${this._jumpCounter}`;
+    const label = `${this._className}.RET${this._jumpCounter}`;
     this._jumpCounter += 1;
     return label;
   }
