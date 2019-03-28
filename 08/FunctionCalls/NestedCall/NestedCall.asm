@@ -18,7 +18,7 @@ M=D
 D=-A
 @THAT
 M=D
-@RET0
+@Sys.RET0
 D=A
 @SP
 A=M
@@ -67,7 +67,7 @@ D=M
 M=D
 @Sys.init
 0;JMP
-(RET0)
+(Sys.RET0)
 (Sys.init)
 @4000
 D=A
@@ -95,7 +95,7 @@ A=M
 D=M
 @R4
 M=D
-@RET1
+@Sys.RET1
 D=A
 @SP
 A=M
@@ -144,7 +144,7 @@ D=M
 M=D
 @Sys.main
 0;JMP
-(RET1)
+(Sys.RET1)
 @SP
 M=M-1
 A=M
@@ -283,7 +283,7 @@ A=M
 M=D
 @SP
 M=M+1
-@RET2
+@Sys.RET2
 D=A
 @SP
 A=M
@@ -332,7 +332,7 @@ D=M
 M=D
 @Sys.add12
 0;JMP
-(RET2)
+(Sys.RET2)
 @SP
 M=M-1
 A=M

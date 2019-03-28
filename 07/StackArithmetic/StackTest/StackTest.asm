@@ -1,7 +1,3 @@
-@256
-D=A
-@SP
-M=D
 @17
 D=A
 @SP
@@ -400,7 +396,7 @@ M=M+1
 M=M-1
 @SP
 A=M
-M=!M
+M=-M
 @SP
 M=M+1
 @SP
@@ -438,6 +434,6 @@ M=M+1
 M=M-1
 @SP
 A=M
-M=-M
+M=!M
 @SP
 M=M+1
