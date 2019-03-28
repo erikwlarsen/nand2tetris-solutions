@@ -42,7 +42,7 @@ switch (filePath[filePath.length - 1]) {
 
 try {
   if (existsSync(outputPath)) unlinkSync(outputPath);
-  filePaths.reduce(async (prevProm, file) => {
+  filePaths.reduce(async (prevProm, file, idx) => {
     // because airbnb does not like for-of loops!
     await prevProm;
     const filePathArr = file.split('/');
@@ -54,7 +54,7 @@ try {
       readStream,
       new MakeLines(),
       new Parser(),
-      new CodeWriter({ className, init }),
+      new CodeWriter({ className, init: init && idx === 0 }),
       writeStream,
     );
   }, Promise.resolve());
