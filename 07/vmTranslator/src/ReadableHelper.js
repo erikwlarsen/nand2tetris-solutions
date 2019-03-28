@@ -61,8 +61,8 @@ class ReadableHelper {
     this.loadMIntoD();
   }
 
-  loadContentsOfStatic(index) {
-    this.loadConstant(`${this._className}.${index}`);
+  loadContentsOfStatic(className, index) {
+    this.loadConstant(`${className}.${index}`);
     this.loadMIntoD();
   }
 

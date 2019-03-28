@@ -238,7 +238,7 @@ class CodeWriter extends Transform {
         this._rh.loadContentsOfTemp(index);
         break;
       case segments.STATIC:
-        this._rh.loadContentsOfStatic(index);
+        this._rh.loadContentsOfStatic(this._className, index);
         break;
       default:
     }
