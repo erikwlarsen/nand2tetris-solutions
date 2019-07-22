@@ -335,7 +335,7 @@ class CodeWriter extends Transform {
     this._rh.loadContentsOfStackPointer();
     this._rh.loadMIntoD();
     this._rh.loadConstant(label);
-    this._rh.jumpIfGt();
+    this._rh.jumpIfNe();
     return done();
   }
 

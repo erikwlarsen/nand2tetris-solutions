@@ -121,6 +121,10 @@ class ReadableHelper {
     this._r.push('D;JLT\n');
   }
 
+  jumpIfNe() {
+    this._r.push('D;JNE\n');
+  }
+
   jump() {
     this._r.push('0;JMP\n');
   }
@@ -150,7 +154,7 @@ class ReadableHelper {
   }
 
   loadDMinusOneIntoMAndD() {
-    this._r.push('MD=D-1');
+    this._r.push('MD=D-1\n');
   }
 
   restoreRegister(frame, register) {
