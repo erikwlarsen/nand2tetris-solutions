@@ -1,0 +1,5 @@
+module.exports = {
+  MULTILINE_COMMENT_OPEN: '/*',
+  MULTILINE_COMMENT_CLOSE: '*/',
+  ONELINE_COMMENT_OPEN: '//',
+};

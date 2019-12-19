@@ -4,6 +4,8 @@
 // Pipes read -> JackTokenizer -> CompilationEngine -> write
 const fs = require('fs');
 const { pipeline } = require('stream');
+const MakeLines = require('./MakeLines');
+const RemoveComments = require('./RemoveComments');
 const JackTokenizer = require('./JackTokenizer');
 const CompilationEngine = require('./CompilationEngine');
 
@@ -15,10 +17,17 @@ module.exports = class JackAnalyzer {
     this.writeStream = fs.createWriteStream(`${dirPath}/${writePath}`);
   }
 
+  // split into lines
+  // remove comments
+  // split into words
+  // classify tokens
+  // compile them into XML
   run() {
     return new Promise((resolve, reject) => {
       pipeline(
         this.readStream,
+        new MakeLines(),
+        new RemoveComments(),
         new JackTokenizer(),
         new CompilationEngine(),
         this.writeStream,
