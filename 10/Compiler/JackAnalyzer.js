@@ -10,11 +10,11 @@ const JackTokenizer = require('./JackTokenizer');
 const CompilationEngine = require('./CompilationEngine');
 
 module.exports = class JackAnalyzer {
-  constructor(filePath, dirPath) {
+  constructor(filePath) {
     this.readStream = fs.createReadStream(filePath);
     const pathParts = filePath.split('.');
     const writePath = pathParts.slice(0, -1).join('.').concat('.xml');
-    this.writeStream = fs.createWriteStream(`${dirPath}/${writePath}`);
+    this.writeStream = fs.createWriteStream(writePath);
   }
 
   // split into lines
@@ -32,10 +32,11 @@ module.exports = class JackAnalyzer {
         new CompilationEngine(),
         this.writeStream,
         (err) => {
-          if (err) return reject (err);
-          resolve();
-        }
-      )
+          if (err) return reject(err);
+          console.log('done parsing!');
+          return resolve();
+        },
+      );
     });
   }
-}
+};

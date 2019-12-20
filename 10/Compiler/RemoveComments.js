@@ -1,29 +1,27 @@
 const { Transform } = require('stream');
 const constants = require('./constants');
 
-const checkForMultilineComment = line =>
-  line.indexOf(constants.MULTILINE_COMMENT_OPEN) !== -1;
+const checkForMultilineComment = line => line.indexOf(constants.MULTILINE_COMMENT_OPEN) !== -1;
 
-const checkForMultilineCommentEnd = line =>
-  line.indexOf(constants.MULTILINE_COMMENT_CLOSE) !== -1;
+const checkForMultilineCommentEnd = line => line.indexOf(constants.MULTILINE_COMMENT_CLOSE) !== -1;
 
-const checkForOnelineComment = line =>
-  line.indexOf(constants.ONELINE_COMMENT_OPEN) !== -1;
+const checkForOnelineComment = line => line.indexOf(constants.ONELINE_COMMENT_OPEN) !== -1;
 
-const removeLineSection = (line, start, end = Infinity) =>
-  line.slice(0, start).concat(line.slice(end + 1));
+const removeLineSection = (line, start, end = Infinity) => (
+  line.slice(0, start).concat(line.slice(end + 1))
+);
 
 const removeOnelineComment = (line) => {
   const onelineCommentStart = line.indexOf(constants.ONELINE_COMMENT_OPEN);
   return removeLineSection(line, onelineCommentStart);
-}
+};
 
 // gets index that needs to be deleted through in order to remove comment close
-const getMultilineEndIndex = line =>
-  line.indexOf(constants.MULTILINE_COMMENT_CLOSE) + 1;
+const getMultilineEndIndex = line => line.indexOf(constants.MULTILINE_COMMENT_CLOSE) + 1;
 
 module.exports = class RemoveComments extends Transform {
   constructor() {
+    super();
     this.openComment = false;
   }
 
@@ -35,10 +33,10 @@ module.exports = class RemoveComments extends Transform {
     // if it exists, remove through comment end and then proceed as normal
     // if openComment is false
     if (this.openComment) {
-      const hasCommentEnd = checkForMultilineCommentEnd(line)
+      const hasCommentEnd = checkForMultilineCommentEnd(line);
       if (hasCommentEnd) { // remove comment through end and proceed as normal
         const commentEndIndex = getMultilineEndIndex(line);
-        line = removeLineSection(0, commentEndIndex);
+        line = removeLineSection(line, 0, commentEndIndex);
         this.openComment = false;
       } else return done(); // if there is no comment end, this whole line is a comment
     }
@@ -75,4 +73,4 @@ module.exports = class RemoveComments extends Transform {
     }
     return trimmedLine;
   }
-}
+};
