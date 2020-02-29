@@ -3,6 +3,7 @@
   "rules": {
     "no-underscore-dangle": [2, { "allowAfterThis": true }],
     "no-use-before-define": ["error", { "functions": true, "classes": false, "variables": false }],
-    "no-nested-ternary": 0
+    "no-nested-ternary": 0,
+    "no-console": 0
   }
 }

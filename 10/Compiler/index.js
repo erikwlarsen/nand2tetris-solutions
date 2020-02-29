@@ -7,7 +7,7 @@ const JackAnalyzer = require('./JackAnalyzer');
 
 (async () => {
   try {
-    const [,,filePath] = process.argv;
+    const [,, filePath] = process.argv;
     const fullPath = path.resolve(process.cwd(), filePath);
     if (!fs.existsSync(fullPath)) {
       throw new Error(`could not find file or directory at path ${fullPath}`);
@@ -18,12 +18,12 @@ const JackAnalyzer = require('./JackAnalyzer');
       const files = fs.readdirSync(fullPath);
       files.forEach(file => filesToProcess.push(`${fullPath}/${file}`));
     }
-    await Promise.all(filesToProcess.map(fPath => {
+    await Promise.all(filesToProcess.map((fPath) => {
       const pathParts = fPath.split('.');
       const extension = pathParts.pop();
       if (extension !== 'jack') {
         console.warn(`Input file ${filePath} does not have correct extension, skipping`);
-        return;
+        return Promise.resolve();
       }
       const directory = fPath.split('/').slice(0, -1).join('/');
       const jackAnalyzer = new JackAnalyzer(fPath, directory);
