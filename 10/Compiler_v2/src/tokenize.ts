@@ -1,23 +1,22 @@
-type TokenType = 'KEYWORD'|'SYMBOL'|'IDENTIFIER'|'INT_CONST'|'STRING_CONST'|'NONE';
-interface TokenBase {
-  tokenType: TokenType;
-  value: string;
-  exists: boolean;
-}
+import { TokenType, TokenBase } from './types/tokenize.types';
 
-const keywordRegex = /^(CLASS|METHOD|FUNCTION|CONSTRUCTOR|INT|BOOLEAN|CHAR|VOID|VAR|STATIC|FIELD|LET|DO|IF|ELSE|WHILE|RETURN|TRUE|FALSE|NULL|THIS)/;
+const keywordRegex = /^(class|method|function|constructor|int|boolean|char|void|var|static|field|let|do|if|else|while|return|true|false|null|this)/;
 const symbolRegex = /^({|}|\(|\)|\[|]|\.|,|;|\+|-|\*|\/|&|\||<|>|=|~)/;
 const identifierRegex = /^[a-zA-Z][a-zA-Z0-9_]*/;
 const integerRegex = /^\d+/;
 const stringRegex = /^".*"/;
 
-const removeMultilineComments = (text: string) => text.replace(/\/\*[\s\S]*?\*\//g, '');
+export const removeMultilineComments = (text: string) => text.replace(/\/\*[\s\S]*?\*\//g, '');
 
-const removeOnelineComments = (text: string) => text.replace(/\/\/.*/g, '');
+export const removeOnelineComments = (text: string) => text.replace(/\/\/.*/g, '');
 
-const extractToken = (token: TokenBase, text: string, regex: RegExp, tokenType: TokenType): { token: TokenBase, text: string } => {
-  if (token.exists) {
-    return { token, text };
+export const removeToken = (token: string, text: string) => {
+  return text.slice(token.length);
+};
+
+export const extractToken = (prevToken: TokenBase, text: string, regex: RegExp, tokenType: TokenType): { token: TokenBase, text: string } => {
+  if (prevToken.exists) {
+    return { token: prevToken, text };
   }
   const [value] = text.match(regex) || [''];
   return {
@@ -26,11 +25,7 @@ const extractToken = (token: TokenBase, text: string, regex: RegExp, tokenType: 
   };
 };
 
-const removeToken = (token: string, text: string) => {
-  return text.slice(token.length);
-}
-
-const extractTokens = (tokens: TokenBase[], text: string): TokenBase[] => {
+export const extractTokens = (tokens: TokenBase[], text: string): TokenBase[] => {
   const trimmedText = text.trim();
   if (!trimmedText) {
     return tokens;
@@ -53,3 +48,4 @@ const extractTokens = (tokens: TokenBase[], text: string): TokenBase[] => {
 
 export default (text: string) =>
   extractTokens([], removeOnelineComments(removeMultilineComments(text)));
+
