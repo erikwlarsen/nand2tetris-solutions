@@ -1,4 +1,4 @@
-import { TokenType, TokenBase } from '../src/types/tokenize.types';
+import { TokenType, TokenDetails } from '../src/types/tokenize.types';
 import tokenize, {
   removeMultilineComments,
   removeOnelineComments,
@@ -73,7 +73,7 @@ Code Code Code`;
 
   describe('extractToken', () => {
     const re = /^\d+/; // Integer at beginning of string
-    const prevToken: TokenBase = {
+    const prevToken: TokenDetails = {
       tokenType: 'KEYWORD',
       value: '',
       exists: false,
@@ -112,12 +112,12 @@ code code`;
   });
 
   describe('extractTokens', () => {
-    const token1: TokenBase = {
+    const token1: TokenDetails = {
       tokenType: 'KEYWORD',
       value: 'class',
       exists: true,
     };
-    const token2: TokenBase = {
+    const token2: TokenDetails = {
       tokenType: 'IDENTIFIER',
       value: 'Main',
       exists: true,

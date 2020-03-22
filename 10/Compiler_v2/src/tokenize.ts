@@ -1,4 +1,4 @@
-import { TokenType, TokenBase } from './types/tokenize.types';
+import { TokenType, TokenDetails } from './types/tokenize.types';
 
 const keywordRegex = /^(class|method|function|constructor|int|boolean|char|void|var|static|field|let|do|if|else|while|return|true|false|null|this)/;
 const symbolRegex = /^({|}|\(|\)|\[|]|\.|,|;|\+|-|\*|\/|&|\||<|>|=|~)/;
@@ -14,7 +14,7 @@ export const removeToken = (token: string, text: string) => {
   return text.slice(token.length);
 };
 
-export const extractToken = (prevToken: TokenBase, text: string, regex: RegExp, tokenType: TokenType): { token: TokenBase, text: string } => {
+export const extractToken = (prevToken: TokenDetails, text: string, regex: RegExp, tokenType: TokenType): { token: TokenDetails, text: string } => {
   if (prevToken.exists) {
     return { token: prevToken, text };
   }
@@ -25,7 +25,7 @@ export const extractToken = (prevToken: TokenBase, text: string, regex: RegExp, 
   };
 };
 
-export const extractTokens = (tokens: TokenBase[], text: string): TokenBase[] => {
+export const extractTokens = (tokens: TokenDetails[], text: string): TokenDetails[] => {
   const trimmedText = text.trim();
   if (!trimmedText) {
     return tokens;
@@ -38,11 +38,14 @@ export const extractTokens = (tokens: TokenBase[], text: string): TokenBase[] =>
     { regex: stringRegex, tokenType: 'STRING_CONST' },
   ];
   const { token } = tokenTypes.reduce((
-    { token, text }: { token: TokenBase, text: string},
-    { regex, tokenType }: { regex: RegExp, tokenType: TokenType }
+    { token, text }: { token: TokenDetails, text: string },
+    { regex, tokenType }
   ) => {
     return extractToken(token, text, regex, tokenType);
-  }, { token: { value: '', exists: false, tokenType: 'NONE' }, text: trimmedText });
+  }, {
+    token: { value: '', exists: false, tokenType: 'NONE' },
+    text: trimmedText
+  });
   return extractTokens(tokens.concat(token), removeToken(token.value, trimmedText));
 };
 
