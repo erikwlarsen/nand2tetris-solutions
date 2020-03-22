@@ -14,6 +14,7 @@ module.exports = class JackAnalyzer {
     this.readStream = fs.createReadStream(filePath);
     const pathParts = filePath.split('.');
     const writePath = pathParts.slice(0, -1).join('.').concat('.xml');
+    this.writeFileName = writePath.split('/').pop();
     this.writeStream = fs.createWriteStream(writePath);
   }
 
@@ -33,7 +34,7 @@ module.exports = class JackAnalyzer {
         this.writeStream,
         (err) => {
           if (err) return reject(err);
-          console.log('done parsing!');
+          console.log(`done writing ${this.writeFileName}!`);
           return resolve();
         },
       );

@@ -3,11 +3,11 @@ module.exports = {
   MULTILINE_COMMENT_CLOSE: '*/',
   ONELINE_COMMENT_OPEN: '//',
   TOKEN_TYPES: {
-    KEYWORD: 'KEYWORD',
-    SYMBOL: 'SYMBOL',
-    IDENTIFIER: 'IDENTIFIER',
-    INT_CONST: 'INT_CONST',
-    STRING_CONST: 'STRING_CONST',
+    KEYWORD: 'keyword',
+    SYMBOL: 'symbol',
+    IDENTIFIER: 'identifier',
+    INT_CONST: 'integerConstant',
+    STRING_CONST: 'stringConstant',
   },
   KEYWORDS: {
     class: 'class',
@@ -53,4 +53,8 @@ module.exports = {
     '=': '=',
     '~': '~',
   },
+  ANY: 'ANY',
+  ZERO_OR_ONE: '?',
+  ZERO_OR_MORE: '*',
+  TAB_LENGTH: 4,
 };
