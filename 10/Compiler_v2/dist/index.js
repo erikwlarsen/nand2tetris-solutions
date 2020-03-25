@@ -1,7 +1,4 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 var __importStar = (this && this.__importStar) || function (mod) {
     if (mod && mod.__esModule) return mod;
     var result = {};
@@ -9,10 +6,15 @@ var __importStar = (this && this.__importStar) || function (mod) {
     result["default"] = mod;
     return result;
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-const tokenize_1 = __importDefault(require("./tokenize"));
 const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
+const tokenize_1 = __importDefault(require("./tokenize"));
+const compile_1 = __importDefault(require("./compile"));
+const toXml_1 = __importDefault(require("./toXml"));
 try {
     const [, , filePath] = process.argv;
     const fullPath = path.resolve(process.cwd(), filePath);
@@ -36,8 +38,8 @@ try {
             return;
         }
         const text = fs.readFileSync(fPath, 'utf8');
-        const output = tokenize_1.default(text);
-        fs.writeFileSync(pathParts.join('.').concat('.json'), JSON.stringify(output, null, 2));
+        const output = toXml_1.default(compile_1.default(tokenize_1.default(text)));
+        fs.writeFileSync(pathParts.join('.').concat('.xml'), output);
     });
 }
 catch (e) {

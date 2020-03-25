@@ -1,4 +1,4 @@
-import { TokenType, TokenDetails } from './types/tokenize.types';
+import { TokenType, TokenDetails } from './types';
 
 const keywordRegex = /^(class|method|function|constructor|int|boolean|char|void|var|static|field|let|do|if|else|while|return|true|false|null|this)/;
 const symbolRegex = /^({|}|\(|\)|\[|]|\.|,|;|\+|-|\*|\/|&|\||<|>|=|~)/;
@@ -43,7 +43,7 @@ export const extractTokens = (tokens: TokenDetails[], text: string): TokenDetail
   ) => {
     return extractToken(token, text, regex, tokenType);
   }, {
-    token: { value: '', exists: false, tokenType: 'NONE' },
+    token: { value: '', exists: false, tokenType: 'KEYWORD' },
     text: trimmedText
   });
   return extractTokens(tokens.concat(token), removeToken(token.value, trimmedText));

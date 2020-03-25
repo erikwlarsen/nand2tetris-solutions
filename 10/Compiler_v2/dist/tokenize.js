@@ -34,7 +34,10 @@ exports.extractTokens = (tokens, text) => {
     ];
     const { token } = tokenTypes.reduce(({ token, text }, { regex, tokenType }) => {
         return exports.extractToken(token, text, regex, tokenType);
-    }, { token: { value: '', exists: false, tokenType: 'NONE' }, text: trimmedText });
+    }, {
+        token: { value: '', exists: false, tokenType: 'KEYWORD' },
+        text: trimmedText
+    });
     return exports.extractTokens(tokens.concat(token), exports.removeToken(token.value, trimmedText));
 };
 exports.default = (text) => exports.extractTokens([], exports.removeOnelineComments(exports.removeMultilineComments(text)));

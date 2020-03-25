@@ -1,6 +1,8 @@
-import tokenize from './tokenize';
 import * as fs from 'fs';
 import * as path from 'path';
+import tokenize from './tokenize';
+import compile from './compile';
+import toXml from './toXml';
 
 try {
   const [,, filePath] = process.argv;
@@ -24,8 +26,8 @@ try {
         return;
       }
       const text = fs.readFileSync(fPath, 'utf8');
-      const output = tokenize(text);
-      fs.writeFileSync(pathParts.join('.').concat('.json'), JSON.stringify(output, null, 2));
+      const output = toXml(compile(tokenize(text)));
+      fs.writeFileSync(pathParts.join('.').concat('.xml'), output);
   });
 } catch (e) {
   console.error(e);
