@@ -1,3 +1,6 @@
+/**
+ * Initial implementation of compilation engine. Does not work!
+ */
 // accept file input
 // Determine if is file or directory. If directory, enter it append file names to list
 // Create and run new JackAnalyzers for each file
@@ -22,7 +25,7 @@ const JackAnalyzer = require('./JackAnalyzer');
       const pathParts = fPath.split('.');
       const extension = pathParts.pop();
       if (extension !== 'jack') {
-        console.warn(`Input file ${filePath} does not have correct extension, skipping`);
+        console.warn(`Input file ${filePath}.${extension} does not have correct extension, skipping`);
         return Promise.resolve();
       }
       const directory = fPath.split('/').slice(0, -1).join('/');
