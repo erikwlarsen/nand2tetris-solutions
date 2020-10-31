@@ -351,7 +351,7 @@ const compile = {
         }
         else {
             // syntax: context.subroutine(expressionList)
-            const context = tree.children[0].value;
+            let context = tree.children[0].value;
             const subroutine = tree.children[2].value;
             const expressionList = tree.children[4];
             if (!expressionList.isTerminal) {
@@ -360,6 +360,8 @@ const compile = {
                 // If context has been declared, we assume it's of the correct type and has
                 // the subroutine that is being called.
                 if (variable) {
+                    // We need to get the class name for this instance that is calling the subroutine
+                    context = variable.type;
                     // Increment args since we will pass in `this`
                     numArgs += 1;
                     vm = vm.concat(vmWriter.pushIdentifier(variable.kind, variable.index));
