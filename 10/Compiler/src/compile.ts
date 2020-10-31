@@ -71,7 +71,6 @@ const compile: { [key: string]: CompileFn } = {
     if (fnType === 'constructor') {
       // Get size of object we're creating
       const objectSize = parentTable.getIndex('field');
-      console.log(objectSize);
       // allocate memory and get address on stop of stack
       vm = vm.concat(vmWriter.alloc(objectSize));
       // pop memory address to pointer 0 (aka THIS base address)
@@ -184,6 +183,10 @@ const compile: { [key: string]: CompileFn } = {
 
   expressionList(tree, parentTable) {
     const [firstExpression] = tree.children;
+    if (!firstExpression) {
+      // Handle cases where expressionList has no children (invoked with no args)
+      return '';
+    }
     if (firstExpression.isTerminal) {
       throw new Unexpected('expression', 'expressionList', firstExpression.value, firstExpression.tokenType);
     }

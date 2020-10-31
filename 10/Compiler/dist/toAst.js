@@ -213,13 +213,11 @@ exports.treeifyExpressionList = (token) => {
         ]), true),
     ]), false);
     return {
-        nodes: result.nodes.length
-            ? [{
-                    value: 'expressionList',
-                    children: result.nodes,
-                    isTerminal: false,
-                }]
-            : [],
+        nodes: [{
+                value: 'expressionList',
+                children: result.nodes,
+                isTerminal: false,
+            }],
         token: result.token,
     };
 };

@@ -261,13 +261,11 @@ export const treeifyExpressionList: TokenFunc = (token) => {
     false
   );
   return {
-    nodes: result.nodes.length
-      ? [{
-        value: 'expressionList',
-        children: result.nodes,
-        isTerminal: false,
-      }]
-      : [],
+    nodes: [{
+      value: 'expressionList',
+      children: result.nodes,
+      isTerminal: false,
+    }],
     token: result.token,
   };
 };
