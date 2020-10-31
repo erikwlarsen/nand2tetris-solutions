@@ -2,7 +2,6 @@ import { XzibitNode, TerminalNode } from './types';
 import SymbolTable from './SymbolTable';
 
 type CompileFn = (tree: XzibitNode, table: SymbolTable) => string;
-// type TerminalFn = (node: TerminalNode, vm: string, table?: SymbolTable) => string;
 
 const varKindMemSegmentMap: {[key: string]: string} = {
   var: 'local',

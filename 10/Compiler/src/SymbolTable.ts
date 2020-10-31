@@ -52,28 +52,4 @@ export default class SymbolTable {
     this.currentLabel += 1;
     return label;
   }
-
-  // addPendingKind(kind: VarKind) {
-  //   if (this.pendingVar) {
-  //     throw new Error('Attempted to initialize conflicting variables');
-  //   }
-  //   this.pendingVar = { kind };
-  // }
-
-  // addPendingType(type: VarType) {
-  //   if (!this.pendingVar) {
-  //     throw new Error('Attempted declare type of variable before kind');
-  //   }
-  //   this.pendingVar.type = type;
-  // }
-
-  // resolvePendingVar(name: string) {
-  //   if (this.pendingVar) {
-  //     if (!this.pendingVar.type) {
-  //       throw new Error('Attempted to initialize variable without type');
-  //     }
-  //     this.declare(name, this.pendingVar.type, this.pendingVar.kind);
-  //     delete this.pendingVar;
-  //   }
-  // }
 }

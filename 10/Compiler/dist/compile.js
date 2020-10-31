@@ -4,7 +4,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const SymbolTable_1 = __importDefault(require("./SymbolTable"));
-// type TerminalFn = (node: TerminalNode, vm: string, table?: SymbolTable) => string;
 const varKindMemSegmentMap = {
     var: 'local',
     arg: 'argument',
