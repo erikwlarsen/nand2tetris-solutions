@@ -6,7 +6,8 @@
   "scripts": {
     "test": "jest",
     "lint": "eslint . --ext .js,.tsx,.ts",
-    "build-dev": "node node_modules/.bin/tsc --watch"
+    "build-dev": "node node_modules/.bin/tsc --watch",
+    "compile": "node dist/index.js"
   },
   "author": "",
   "license": "ISC",
