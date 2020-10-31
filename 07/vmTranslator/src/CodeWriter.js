@@ -241,6 +241,7 @@ class CodeWriter extends Transform {
         this._rh.loadContentsOfStatic(this._className, index);
         break;
       default:
+        throw new Error(`CompilerError: invalid memory segment ${segment} for push command`);
     }
     this._rh.loadContentsOfStackPointer();
     this._rh.loadDIntoM();
@@ -306,6 +307,7 @@ class CodeWriter extends Transform {
         this._rh.loadDIntoM();
         return done();
       default:
+        throw new Error(`CompilerError: invalid memory segment ${segment} for pop command`);
     }
     this.push('D=M+D\n');
     this._rh.loadConstant('R13');

@@ -13,10 +13,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
 const tokenize_1 = __importDefault(require("./tokenize"));
-const compile_1 = __importDefault(require("./compile"));
+const toAst_1 = __importDefault(require("./toAst"));
 const toXml_1 = __importDefault(require("./toXml"));
+const compile_1 = __importDefault(require("./compile"));
+const XML_FLAG = '--xml';
 try {
     const [, , filePath] = process.argv;
+    const xmlFlag = process.argv.includes(XML_FLAG);
     const fullPath = path.resolve(process.cwd(), filePath);
     if (!fs.existsSync(fullPath)) {
         throw new Error(`could not find file or directory at path ${fullPath}`);
@@ -34,12 +37,13 @@ try {
         const pathParts = fPath.split('.');
         const extension = pathParts.pop();
         if (extension !== 'jack') {
-            console.log(`Input file ${filePath}.${extension} does not have jack extension, skipping`);
+            console.error(`Input file ${filePath}.${extension} does not have jack extension, skipping`);
             return;
         }
         const text = fs.readFileSync(fPath, 'utf8');
-        const output = toXml_1.default(compile_1.default(tokenize_1.default(text)));
-        fs.writeFileSync(pathParts.join('.').concat('.xml'), output);
+        const finalFunc = xmlFlag ? toXml_1.default : compile_1.default;
+        const output = finalFunc(toAst_1.default(tokenize_1.default(text)));
+        fs.writeFileSync(pathParts.join('.').concat(xmlFlag ? '.xml' : '.vm'), output);
     });
 }
 catch (e) {

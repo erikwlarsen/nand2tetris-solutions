@@ -29,3 +29,25 @@ export type  MultiTokenFunc = (token: TokenListItem, fns: TokenFunc[]) =>
   { token: TokenListItem, nodes: SiblingNodes }
 export type HigherOrderTokenFunc = (values: string[]) => (token: TokenListItem) =>
   { token: TokenListItem, nodes: SiblingNodes }
+
+export type identifier = string;
+
+export type VarKind = 'static'|'field'|'arg'|'var';
+export type VarType = 'int'|'string'|identifier;
+
+export interface VarDetails {
+  type: VarType;
+  kind: string;
+  index: number;
+}
+
+export interface PartialVarDetails {
+  kind: VarKind;
+  type?: VarType;
+}
+
+export interface Scope {
+  [varName: string]: VarDetails;
+}
+
+export type SegmentType = 'CONSTANT'|'LOCAL'|'ARGUMENT'|'THIS'|'THAT'|'POINTER'|'TEMP'|'STATIC';

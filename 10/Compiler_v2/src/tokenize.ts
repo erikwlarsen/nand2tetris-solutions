@@ -1,6 +1,6 @@
 import { TokenType, TokenDetails } from './types';
 
-const keywordRegex = /^(class|method|function|constructor|int|boolean|char|void|var|static|field|let|do|if|else|while|return|true|false|null|this)/;
+const keywordRegex = /^(class|method|function|constructor|int|boolean|char|void|var|static|field|let|do|if|else|while|return|true|false|null|this)\b/;
 const symbolRegex = /^({|}|\(|\)|\[|]|\.|,|;|\+|-|\*|\/|&|\||<|>|=|~)/;
 const identifierRegex = /^[a-zA-Z][a-zA-Z0-9_]*/;
 const integerRegex = /^\d+/;
@@ -14,7 +14,11 @@ export const removeToken = (token: string, text: string) => {
   return text.slice(token.length);
 };
 
-export const extractToken = (prevToken: TokenDetails, text: string, regex: RegExp, tokenType: TokenType): { token: TokenDetails, text: string } => {
+export const extractToken = (
+  prevToken: TokenDetails,
+  text: string, regex: RegExp,
+  tokenType: TokenType
+): { token: TokenDetails, text: string } => {
   if (prevToken.exists) {
     return { token: prevToken, text };
   }
