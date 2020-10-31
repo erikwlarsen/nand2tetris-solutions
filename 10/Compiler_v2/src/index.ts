@@ -1,11 +1,15 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import tokenize from './tokenize';
-import compile from './compile';
+import toAst from './toAst';
 import toXml from './toXml';
+import compile from './compile';
+
+const XML_FLAG = '--xml';
 
 try {
   const [,, filePath] = process.argv;
+  const xmlFlag = process.argv.includes(XML_FLAG);
   const fullPath = path.resolve(process.cwd(), filePath);
   if (!fs.existsSync(fullPath)) {
     throw new Error(`could not find file or directory at path ${fullPath}`);
@@ -22,12 +26,13 @@ try {
     const pathParts = fPath.split('.');
       const extension = pathParts.pop();
       if (extension !== 'jack') {
-        console.log(`Input file ${filePath}.${extension} does not have jack extension, skipping`);
+        console.error(`Input file ${filePath}.${extension} does not have jack extension, skipping`);
         return;
       }
       const text = fs.readFileSync(fPath, 'utf8');
-      const output = toXml(compile(tokenize(text)));
-      fs.writeFileSync(pathParts.join('.').concat('.xml'), output);
+      const finalFunc = xmlFlag ? toXml : compile;
+      const output = finalFunc(toAst(tokenize(text)));
+      fs.writeFileSync(pathParts.join('.').concat(xmlFlag ? '.xml' : '.vm'), output);
   });
 } catch (e) {
   console.error(e);

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const keywordRegex = /^(class|method|function|constructor|int|boolean|char|void|var|static|field|let|do|if|else|while|return|true|false|null|this)/;
+const keywordRegex = /^(class|method|function|constructor|int|boolean|char|void|var|static|field|let|do|if|else|while|return|true|false|null|this)\b/;
 const symbolRegex = /^({|}|\(|\)|\[|]|\.|,|;|\+|-|\*|\/|&|\||<|>|=|~)/;
 const identifierRegex = /^[a-zA-Z][a-zA-Z0-9_]*/;
 const integerRegex = /^\d+/;
