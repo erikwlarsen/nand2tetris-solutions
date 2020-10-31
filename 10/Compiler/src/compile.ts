@@ -457,7 +457,7 @@ const vmWriter = {
   pushKeywordConstant(keyword: string) {
     switch (keyword) {
       case 'true':
-        return 'push constant 0\nneg\n';
+        return 'push constant 0\nnot\n';
       case 'false':
       case 'null':
         return 'push constant 0\n';
